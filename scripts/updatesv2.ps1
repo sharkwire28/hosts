@@ -126,7 +126,7 @@ try {
     
     $headers = @{}
     $response = try {
-        Invoke-WebRequest -Uri $repoRawUrl -Method Head -TimeoutSec 10 -ErrorAction Stop
+        Invoke-WebRequest -Uri $repoRawUrl -UseBasicParsing -Method Head -TimeoutSec 3 -ErrorAction Stop
     } catch {
         Write-Log "Failed to check remote file: $_" "ERROR"
         throw
