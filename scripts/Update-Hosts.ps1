@@ -2,6 +2,8 @@
 # Self-Elevating Hosts Updater
 # Author: Gary Magallanes
 # Date: Feb 26, 2026
+# Run via PowerShell 
+# Command: powershell -ExecutionPolicy Bypass -Command "iwr https://raw.githubusercontent.com/sharkwire28/hosts/refs/heads/main/scripts/Update-Hosts.ps1 -UseBasicParsing | iex"
 # ================================
 
 # ---- Self Elevation ----
