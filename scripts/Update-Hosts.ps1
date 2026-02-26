@@ -23,7 +23,7 @@ $hostsPath  = "C:\Windows\System32\drivers\etc\hosts"
 $backupPath = "C:\Windows\System32\drivers\etc\hosts.bak"
 $tempPath   = "$env:TEMP\hosts_new"
 
-$repoRawUrl = "https://raw.githubusercontent.com/sharkwire28/hosts/refs/heads/main/system/hosts"
+$repoRawUrl = "https://raw.githubusercontent.com/sharkwire28/hosts/main/system/hosts"
 
 Write-Host "Downloading latest hosts file..."
 
