@@ -11,7 +11,7 @@ $ErrorActionPreference = "Stop"
 # ---- Self-Elevation ----
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
     Start-Process powershell `
-        -ArgumentList "-ExecutionPolicy Bypass -File `"$PSCommandPath`"" ` #removed parameter -WindowStyle Hidden
+        -ArgumentList "-ExecutionPolicy Bypass -File `"$PSCommandPath`"" `
         -Verb RunAs
     exit
 }
@@ -19,26 +19,36 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 # ---- Paths ----
 $hostsPath   = "C:\Windows\System32\drivers\etc\hosts"
 $workDir     = "C:\ProgramData\HostsUpdater"
-$tempPath    = "$workDir\hosts_new"
+$tempDir     = "$workDir\temp"
+$tempPath    = "$tempDir\hosts_new"
 $logPath     = "$workDir\hosts-updater.log"
 $etagPath    = "$workDir\etag.txt"
-
 $repoRawUrl  = "https://raw.githubusercontent.com/sharkwire28/hosts/main/system/hosts"
 
-# ---- Ensure Working Directory ----
+# ---- Prepare Directories ----
 if (!(Test-Path $workDir)) { New-Item -Path $workDir -ItemType Directory -Force | Out-Null }
+if (!(Test-Path $tempDir)) { 
+    New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
+    (Get-Item $tempDir).Attributes = 'Hidden'
+}
 
 # ---- Logging Function ----
-function Write-Log { param([string]$msg) $ts = Get-Date -Format "yyyy-MM-dd HH:mm:ss"; Add-Content $logPath "$ts - $msg" }
+function Write-Log { 
+    param([string]$msg)
+    $ts = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $line = "$ts - $msg"
+    Add-Content $logPath $line
+    Write-Host $line
+}
 
 try {
-    Write-Log "Starting hourly update check."
+    Write-Log "Starting update check."
 
-    # Force TLS 1.2
+    # Force TLS 1.2 for GitHub
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-    # ---- Check GitHub ETag for fast skip ----
-    $response = Invoke-WebRequest -Uri $repoRawUrl -Method Head -TimeoutSec 15
+    # ---- Check GitHub ETag ----
+    $response = Invoke-WebRequest -Uri $repoRawUrl -Method Head -TimeoutSec 10
     $remoteETag = $response.Headers.ETag
     $lastETag   = if (Test-Path $etagPath) { Get-Content $etagPath -Raw } else { "" }
 
@@ -49,14 +59,14 @@ try {
 
     Write-Log "New version detected. Downloading file..."
     Invoke-WebRequest -Uri $repoRawUrl -OutFile $tempPath -UseBasicParsing -TimeoutSec 20
-    
-    # Remove security warning from downloaded file
-    if (Test-Path $tempPath) { Unblock-File $tempPath }
-    
+
+    # Remove "downloaded from internet" security warning
+    if (Test-Path $tempPath) { Unblock-File $tempPath -ErrorAction SilentlyContinue }
+
     # Save ETag locally
     $remoteETag | Set-Content $etagPath -Force
 
-    # ---- Compute Hashes ----
+    # ---- Compare Hashes ----
     $currentHash = if (Test-Path $hostsPath) { (Get-FileHash $hostsPath -Algorithm SHA256).Hash } else { "" }
     $newHash     = (Get-FileHash $tempPath -Algorithm SHA256).Hash
 
@@ -68,12 +78,12 @@ try {
 
     Write-Log "Change detected! Updating file..."
 
-    # ---- Backup ----
+    # ---- Backup Current Hosts ----
     if (Test-Path $hostsPath) {
         $timestamp  = Get-Date -Format "yyyyMMdd-HHmmss"
         $backupPath = "$workDir\hosts-$timestamp.bak"
         Copy-Item $hostsPath $backupPath -Force
-        Write-Log "Backup created." #Removed $backupPath
+        Write-Log "Backup created"
     }
 
     # ---- Replace Hosts ----
@@ -82,6 +92,7 @@ try {
 
     # ---- Flush DNS ----
     ipconfig /flushdns | Out-Null
+    Write-Log "DNS cache flushed."
 
     Write-Log "File updated successfully."
 
