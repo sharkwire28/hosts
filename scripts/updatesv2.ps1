@@ -6,18 +6,18 @@
 # Run via PowerShell using irm (Invoke-RestMethod)
 # 
 # Execute command using GitHub or custom domain:
-# Command: irm https://raw.githubusercontent.com/sharkwire28/hosts/main/scripts/updates.ps1 | iex
-# Command: irm http://it.acrogroup.net/script/updates.ps1 | iex
+# Command: irm https://raw.githubusercontent.com/sharkwire28/hosts/main/scripts/updatesv2.ps1 | iex
+# Command: irm http://it.acrogroup.net/script/updatesv2.ps1 | iex
 # 
 # Or with execution policy bypass:
-# Command: powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/sharkwire28/hosts/main/scripts/updates.ps1 | iex"
-# Command: powershell -ExecutionPolicy Bypass -Command "irm http://it.acrogroup.net/script/updates.ps1 | iex"
+# Command: powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/sharkwire28/hosts/main/scripts/updatesv2.ps1 | iex"
+# Command: powershell -ExecutionPolicy Bypass -Command "irm http://it.acrogroup.net/script/updatesv2.ps1 | iex"
 # ================================
 
 $ErrorActionPreference = "Stop"
 
 # ---- Script Configuration ----
-$scriptUrl = "https://raw.githubusercontent.com/sharkwire28/hosts/main/scripts/updates.ps1"
+$scriptUrl = "https://raw.githubusercontent.com/sharkwire28/hosts/main/scripts/updatesv2.ps1"
 $repoRawUrl = "https://raw.githubusercontent.com/sharkwire28/hosts/main/system/hosts"
 
 # ---- Self-Elevation for Remote Execution ----
@@ -148,7 +148,7 @@ try {
     
     # ---- Download New File ----
     Write-Log "New version detected. Downloading..." "INFO"
-    Write-Host "Downloading latest hosts file..." -ForegroundColor Yellow
+    Write-Host "Downloading latest file..." -ForegroundColor Yellow
     
     try {
         # Use Invoke-RestMethod for better compatibility
@@ -185,7 +185,7 @@ try {
     
     if ($currentHash -eq $newHash) {
         Write-Log "System hosts file already matches remote version" "INFO"
-        Write-Host "`nHosts file is already up to date." -ForegroundColor Green
+        Write-Host "`nFile is already up to date." -ForegroundColor Green
         Remove-Item $tempPath -Force -ErrorAction SilentlyContinue
         Start-Sleep -Seconds 2
         exit
@@ -200,7 +200,7 @@ try {
         
         try {
             Copy-Item $hostsPath $backupPath -Force
-            Write-Log "Backup created: $backupPath" "SUCCESS"
+            Write-Log "Backup created" "SUCCESS"
             
             # Clean up old backups
             Manage-Backups
@@ -230,7 +230,7 @@ try {
         }
         
         if ($copied) {
-            Write-Log "Hosts file updated successfully" "SUCCESS"
+            Write-Log "File updated successfully" "SUCCESS"
             Remove-Item $tempPath -Force -ErrorAction SilentlyContinue
         }
         
