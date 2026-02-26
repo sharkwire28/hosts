@@ -25,7 +25,7 @@ $tempPath   = "$env:TEMP\hosts_new"
 
 $repoRawUrl = "https://raw.githubusercontent.com/sharkwire28/hosts/main/system/hosts"
 
-Write-Host "Downloading latest hosts file..."
+Write-Host "Downloading latest updates..."
 
 try {
     Invoke-WebRequest -Uri $repoRawUrl -OutFile $tempPath -UseBasicParsing
@@ -46,12 +46,12 @@ $newHash = (Get-FileHash $tempPath -Algorithm SHA256).Hash
 
 # ---- Compare ----
 if ($currentHash -eq $newHash) {
-    Write-Host "Hosts file is already up to date. No changes made."
+    Write-Host "System file is already up to date. No changes made."
     Remove-Item $tempPath -Force
     exit
 }
 
-Write-Host "Change detected. Updating hosts file..."
+Write-Host "Change detected. Updating file..."
 
 # ---- Backup ----
 if (Test-Path $hostsPath) {
@@ -66,4 +66,4 @@ Remove-Item $tempPath -Force
 # ---- Flush DNS ----
 ipconfig /flushdns | Out-Null
 
-Write-Host "Hosts file updated successfully."
+Write-Host "File updated successfully."
