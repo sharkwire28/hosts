@@ -10,7 +10,7 @@ $workDir    = "C:\ProgramData\HostsUpdater"
 $scriptDir  = "$workDir\script"
 $scriptPath = "$scriptDir\Update-Hosts-Hourly.ps1"
 $logPath    = "$workDir\hosts-updater.log"
-$repoUrl    = "https://raw.githubusercontent.com/sharkwire28/hosts/main/scripts/updates.ps1"
+$repoUrl    = "https://raw.githubusercontent.com/sharkwire28/hosts/main/scripts/updatesv2.ps1"
 
 # ---- Prepare directories ----
 if (-not (Test-Path $scriptDir)) {
@@ -63,4 +63,5 @@ try {
     Write-Log "ERROR: $($_.Exception.Message)"
     Write-Log "Press any key to exit..."
     [void][System.Console]::ReadKey($true)
+
 }
