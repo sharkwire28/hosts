@@ -11,8 +11,8 @@ $ErrorActionPreference = "Stop"
 # ---- Self-Elevation ----
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
     Start-Process powershell `
-        -ArgumentList "-ExecutionPolicy Bypass -WindowStyle Hidden -File `"$PSCommandPath`"" `
-        -Verb RunAs -WindowStyle Hidden
+        -ArgumentList "-ExecutionPolicy Bypass -File `"$PSCommandPath`"" ` #removed parameter -WindowStyle Hidden
+        -Verb RunAs
     exit
 }
 
