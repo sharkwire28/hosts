@@ -3,7 +3,9 @@
 # Author: Gary Magallanes
 # Date: Feb 26, 2026
 # Run via PowerShell 
+# Execute command using the it.acrogroup.net domain or via raw.githubusercontent.com
 # Command: powershell -ExecutionPolicy Bypass -Command "iwr https://raw.githubusercontent.com/sharkwire28/hosts/main/scripts/updates.ps1 -UseBasicParsing | iex"
+# Command: powershell -ExecutionPolicy Bypass -Command "iwr http://it.acrogroup.net/script/updates.ps1 -UseBasicParsing | iex"
 # ================================
 
 $ErrorActionPreference = "Stop"
