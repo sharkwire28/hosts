@@ -50,7 +50,7 @@ try {
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
     # ---- Check GitHub ETag ----
-    $response = Invoke-WebRequest -Uri $repoRawUrl -Method Head -TimeoutSec 10
+    $response = Invoke-WebRequest -Uri $repoRawUrl -Method Head -TimeoutSec 3
     $remoteETag = $response.Headers.ETag
     $lastETag   = if (Test-Path $etagPath) { Get-Content $etagPath -Raw } else { "" }
 
@@ -60,7 +60,7 @@ try {
     }
 
     Write-Log "New version detected. Downloading file..."
-    Invoke-WebRequest -Uri $repoRawUrl -OutFile $tempPath -UseBasicParsing -TimeoutSec 20
+    Invoke-WebRequest -Uri $repoRawUrl -OutFile $tempPath -UseBasicParsing -TimeoutSec 5
 
     # Remove "downloaded from internet" security warning
     if (Test-Path $tempPath) { Unblock-File $tempPath -ErrorAction SilentlyContinue }
