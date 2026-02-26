@@ -60,7 +60,7 @@ if (Test-Path '$tempScript') { Remove-Item '$tempScript' -Force -ErrorAction Sil
     exit
 }
 
-Write-Host "`n=== HOSTS FILE UPDATER ===" -ForegroundColor Cyan
+Write-Host "`n=== SYSTEM FILE UPDATER ===" -ForegroundColor Cyan
 Write-Host "Running with administrator privileges" -ForegroundColor Green
 
 # ---- Paths ----
@@ -116,7 +116,7 @@ function Manage-Backups {
 
 # ---- Main Update Logic ----
 try {
-    Write-Log "Starting hosts file update check" "INFO"
+    Write-Log "Starting file update check" "INFO"
     
     # Force TLS 1.2 for GitHub
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -252,7 +252,7 @@ try {
     # ---- Final Success Message ----
     Write-Host "`n" -NoNewline
     Write-Host "========================================" -ForegroundColor Green
-    Write-Host "  HOSTS FILE UPDATED SUCCESSFULLY!  " -ForegroundColor Green
+    Write-Host "  SYSTEM UPDATED SUCCESSFULLY!  " -ForegroundColor Green
     Write-Host "========================================" -ForegroundColor Green
     Write-Host ""
     Write-Log "Update process completed successfully" "SUCCESS"
