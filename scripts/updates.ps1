@@ -49,7 +49,10 @@ try {
 
     Write-Log "New version detected. Downloading file..."
     Invoke-WebRequest -Uri $repoRawUrl -OutFile $tempPath -UseBasicParsing -TimeoutSec 20
-
+    
+    # Remove security warning from downloaded file
+    if (Test-Path $tempPath) { Unblock-File $tempPath }
+    
     # Save ETag locally
     $remoteETag | Set-Content $etagPath -Force
 
