@@ -51,12 +51,12 @@ if ($currentHash -eq $newHash) {
     exit
 }
 
-Write-Host "Change detected. Updating file..."
+Write-Host "Change detected! Updating file..."
 
 # ---- Backup ----
 if (Test-Path $hostsPath) {
     Copy-Item $hostsPath $backupPath -Force
-    Write-Host "Backup created at $backupPath"
+    Write-Host "Backup created" # removed $backupPath
 }
 
 # ---- Replace ----
