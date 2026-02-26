@@ -38,7 +38,7 @@ try {
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
     # ---- Check GitHub ETag for fast skip ----
-    $response = Invoke-WebRequest -Uri $repoRawUrl $tempPath -UseBasicParsing -Method Head -TimeoutSec 15
+    $response = Invoke-WebRequest -Uri $repoRawUrl -Method Head -TimeoutSec 15
     $remoteETag = $response.Headers.ETag
     $lastETag   = if (Test-Path $etagPath) { Get-Content $etagPath -Raw } else { "" }
 
