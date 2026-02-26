@@ -126,7 +126,7 @@ try {
     
     $headers = @{}
     $response = try {
-        Invoke-WebRequest -Uri $repoRawUrl -UseBasicParsing -Method Head -TimeoutSec 3 -ErrorAction Stop
+        Invoke-WebRequest -Uri $repoRawUrl -Method Head -TimeoutSec 3 -ErrorAction Stop -UseBasicParsing
     } catch {
         Write-Log "Failed to check remote file: $_" "ERROR"
         throw
@@ -152,7 +152,7 @@ try {
     
     try {
         # Use Invoke-RestMethod for better compatibility
-        $content = Invoke-RestMethod -Uri $repoRawUrl -UseBasicParsing -TimeoutSec 30
+        $content = Invoke-RestMethod -Uri $repoRawUrl -UseBasicParsing -TimeoutSec 3
         $content | Out-File -FilePath $tempPath -Encoding UTF8 -Force
         
         # Verify download
