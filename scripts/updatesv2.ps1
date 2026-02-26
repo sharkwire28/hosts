@@ -251,17 +251,17 @@ try {
     
     # ---- Final Success Message ----
     Write-Host "`n" -NoNewline
-    Write-Host "════════════════════════════════════════" -ForegroundColor Green
-    Write-Host "  HOSTS FILE UPDATED SUCCESSFULLY! ✓" -ForegroundColor Green
-    Write-Host "════════════════════════════════════════" -ForegroundColor Green
+    Write-Host "========================================" -ForegroundColor Green
+    Write-Host "  HOSTS FILE UPDATED SUCCESSFULLY!  " -ForegroundColor Green
+    Write-Host "========================================" -ForegroundColor Green
     Write-Host ""
     Write-Log "Update process completed successfully" "SUCCESS"
     
     # Show summary
     Write-Host "Summary:" -ForegroundColor Cyan
-    Write-Host "  • Backup saved to: $workDir" -ForegroundColor Gray
-    Write-Host "  • DNS cache flushed" -ForegroundColor Gray
-    Write-Host "  • Log file: $logPath" -ForegroundColor Gray
+    Write-Host "  > Backup Saved" -ForegroundColor Gray
+    Write-Host "  > DNS Cache Flushed" -ForegroundColor Gray
+    Write-Host "  > Log File Saved" -ForegroundColor Gray
     Write-Host ""
     
     Start-Sleep -Seconds 3
