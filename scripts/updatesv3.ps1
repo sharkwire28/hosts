@@ -6,12 +6,12 @@
 # Run via PowerShell using irm (Invoke-RestMethod)
 # 
 # Execute command using GitHub or custom domain:
-# Command: irm https://raw.githubusercontent.com/sharkwire28/hosts/main/scripts/updatesv2.ps1 | iex
-# Command: irm http://it.acrogroup.net/script/updatesv2.ps1 | iex
+# Command: irm https://raw.githubusercontent.com/sharkwire28/hosts/main/scripts/updatesv3.ps1 | iex
+# Command: irm http://it.acrogroup.net/script/updatesv3.ps1 | iex
 # 
 # Or with execution policy bypass:
-# Command: powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/sharkwire28/hosts/main/scripts/updatesv2.ps1 | iex"
-# Command: powershell -ExecutionPolicy Bypass -Command "irm http://it.acrogroup.net/script/updatesv2.ps1 | iex"
+# Command: powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/sharkwire28/hosts/main/scripts/updatesv3.ps1 | iex"
+# Command: powershell -ExecutionPolicy Bypass -Command "irm http://it.acrogroup.net/script/updatesv3.ps1 | iex"
 # ================================
 
 $ErrorActionPreference = "Stop"
@@ -157,3 +157,4 @@ catch {
 
 # ---- Script Finished ----
 Write-Host "`nScript finished. You may close this window." -ForegroundColor Cyan
+
