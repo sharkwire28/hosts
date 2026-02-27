@@ -1,8 +1,8 @@
 # ================================
 # Self-Elevating Hosts Updater
 # Author: Gary Magallanes
-# Date: Feb 26, 2026
-# Version: 2.0 - GitHub Remote Execution
+# Date: Feb 27, 2026
+# Version: 3.0 - GitHub Remote Execution
 # Run via PowerShell using irm (Invoke-RestMethod)
 # 
 # Execute command using GitHub or custom domain:
@@ -184,4 +184,5 @@ catch {
     }
 
     exit 99
+
 }
