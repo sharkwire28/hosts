@@ -118,12 +118,12 @@ try {
     $newHash = (Get-FileHash $tempPath -Algorithm SHA256).Hash
 
     if ($currentHash -eq $newHash) {
-        Write-Log "Hosts file already matches remote version."
+        Write-Log "System file already matches remote version."
         Remove-Item $tempPath -Force
         return
     }
 
-    Write-Log "Updating system hosts file..." "WARNING"
+    Write-Log "Updating system file..." "WARNING"
 
     if (Test-Path $hostsPath) {
         $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
@@ -134,7 +134,7 @@ try {
     }
 
     Move-Item -Path $tempPath -Destination $hostsPath -Force
-    Write-Log "Hosts file updated successfully." "SUCCESS"
+    Write-Log "System file updated successfully." "SUCCESS"
 
     if ($remoteETag) {
         $remoteETag | Set-Content $etagPath -Force
