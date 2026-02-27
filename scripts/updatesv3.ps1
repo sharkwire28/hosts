@@ -1,5 +1,5 @@
 # ================================
-# Self-Elevating Hosts Updater
+# Self-Elevating System Updater
 # Author: Gary Magallanes
 # Date: Feb 27, 2026
 # Version: 3.0 - GitHub Remote Execution
@@ -149,4 +149,5 @@ catch {
 }
 
 Write-Host "`nScript finished. You may close this window." -ForegroundColor Cyan
+
 
