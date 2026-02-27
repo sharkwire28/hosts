@@ -9,9 +9,6 @@
 # Command: irm https://raw.githubusercontent.com/sharkwire28/hosts/main/scripts/updatesv3.ps1 | iex
 # Command: irm http://it.acrogroup.net/script/updatesv3.ps1 | iex
 # 
-# Or with execution policy bypass:
-# Command: powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/sharkwire28/hosts/main/scripts/updatesv3.ps1 | iex"
-# Command: powershell -ExecutionPolicy Bypass -Command "irm http://it.acrogroup.net/script/updatesv3.ps1 | iex"
 # ================================
 
 $ErrorActionPreference = "Stop"
@@ -152,3 +149,4 @@ catch {
 }
 
 Write-Host "`nScript finished. You may close this window." -ForegroundColor Cyan
+
