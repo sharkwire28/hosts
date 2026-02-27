@@ -6,18 +6,19 @@
 # Run via PowerShell using irm (Invoke-RestMethod)
 # 
 # Execute command using GitHub or custom domain:
-# Command: irm https://raw.githubusercontent.com/sharkwire28/hosts/main/scripts/updatesv3.ps1 | iex
-# Command: irm http://it.acrogroup.net/script/updatesv3.ps1 | iex
+# Command: irm https://raw.githubusercontent.com/sharkwire28/hosts/main/scripts/updatesv2.ps1 | iex
+# Command: irm http://it.acrogroup.net/script/updatesv2.ps1 | iex
 # 
 # Or with execution policy bypass:
-# Command: powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/sharkwire28/hosts/main/scripts/updatesv3.ps1 | iex"
-# Command: powershell -ExecutionPolicy Bypass -Command "irm http://it.acrogroup.net/script/updatesv3.ps1 | iex"
+# Command: powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/sharkwire28/hosts/main/scripts/updatesv2.ps1 | iex"
+# Command: powershell -ExecutionPolicy Bypass -Command "irm http://it.acrogroup.net/script/updatesv2.ps1 | iex"
 # ================================
 
 $ErrorActionPreference = "Stop"
+$global:ScriptResult = 0
 
 # ---- Script Configuration ----
-$scriptUrl = "https://raw.githubusercontent.com/sharkwire28/hosts/main/scripts/updatesv3.ps1"
+$scriptUrl = "https://raw.githubusercontent.com/sharkwire28/hosts/main/scripts/updatesv2.ps1"
 $repoRawUrl = "https://raw.githubusercontent.com/sharkwire28/hosts/main/system/hosts"
 
 # ---- Self Elevation ----
@@ -25,6 +26,7 @@ $identity  = [Security.Principal.WindowsIdentity]::GetCurrent()
 $principal = New-Object Security.Principal.WindowsPrincipal($identity)
 
 if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+
     Write-Host "Requesting administrator privileges..." -ForegroundColor Yellow
 
     $psi = New-Object System.Diagnostics.ProcessStartInfo
@@ -35,13 +37,13 @@ if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administra
     $psi.WindowStyle = [System.Diagnostics.ProcessWindowStyle]::Normal
 
     [System.Diagnostics.Process]::Start($psi) | Out-Null
-    exit
+    return
 }
 
 Write-Host "`n=== SYSTEM FILE UPDATER ===" -ForegroundColor Cyan
 Write-Host "Running with administrator privileges" -ForegroundColor Green
 
-# ---- Paths (UNCHANGED AS REQUESTED) ----
+# ---- Paths ----
 $hostsPath   = "C:\Windows\System32\drivers\etc\hosts"
 $workDir     = "C:\ProgramData\HostsUpdater"
 $tempDir     = "$workDir\temp"
@@ -50,14 +52,11 @@ $logPath     = "$workDir\hosts-updater.log"
 $etagPath    = "$workDir\etag.txt"
 $maxBackups  = 10  # Keep only last 10 backups
 
-# ---- Ensure TLS 1.2 ----
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-# ---- Prepare Directories ----
 New-Item -Path $workDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 New-Item -Path $tempDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
-# ---- Logging ----
 function Write-Log {
     param([string]$Message, [string]$Level = "INFO")
 
@@ -73,22 +72,21 @@ function Write-Log {
     }
 }
 
-# ---- Backup Rotation ----
 function Manage-Backups {
     $backups = Get-ChildItem -Path $workDir -Filter "hosts-*.bak" |
                Sort-Object CreationTime -Descending
 
     if ($backups.Count -gt $maxBackups) {
         $backups | Select-Object -Skip $maxBackups | Remove-Item -Force
-        Write-Log "Old backups removed." "INFO"
+        Write-Log "Old backups removed."
     }
 }
 
-# ---- Begin Update ----
 try {
+
     Write-Log "Starting update check."
 
-    # ---- Check Remote ETag ----
+    # HEAD request for ETag
     $head = [System.Net.HttpWebRequest]::Create($repoRawUrl)
     $head.Method = "HEAD"
     $head.Timeout = 10000
@@ -96,41 +94,23 @@ try {
     $remoteETag = $response.Headers["ETag"]
     $response.Close()
 
-    $localETag = if (Test-Path $etagPath) {
-        Get-Content $etagPath -Raw
-    } else { "" }
+    $localETag = if (Test-Path $etagPath) { Get-Content $etagPath -Raw } else { "" }
 
     if ($remoteETag -and ($remoteETag -eq $localETag)) {
         Write-Log "No changes detected (ETag match)."
-        exit 0
+        Write-Host "`nSystem already up to date." -ForegroundColor Green
+        return
     }
 
     Write-Log "Change detected. Downloading latest version..."
 
-    # ---- Download Using Invoke-RestMethod ----
-    $downloadSuccess = $false
-    for ($i = 1; $i -le 3; $i++) {
-        try {
-            $content = Invoke-RestMethod -Uri $repoRawUrl -TimeoutSec 20
-            $content | Out-File -FilePath $tempPath -Encoding UTF8 -Force
-            $downloadSuccess = $true
-            break
-        }
-        catch {
-            Write-Log "Download attempt $i failed. Retrying..." "WARNING"
-            Start-Sleep -Seconds 3
-        }
-    }
-
-    if (-not $downloadSuccess) {
-        throw "Download failed after 3 attempts."
-    }
+    $content = Invoke-RestMethod -Uri $repoRawUrl -TimeoutSec 20
+    $content | Out-File -FilePath $tempPath -Encoding UTF8 -Force
 
     if ((Get-Item $tempPath).Length -eq 0) {
         throw "Downloaded file is empty."
     }
 
-    # ---- Hash Compare ----
     $currentHash = if (Test-Path $hostsPath) {
         (Get-FileHash $hostsPath -Algorithm SHA256).Hash
     } else { "" }
@@ -140,12 +120,11 @@ try {
     if ($currentHash -eq $newHash) {
         Write-Log "Hosts file already matches remote version."
         Remove-Item $tempPath -Force
-        exit 0
+        return
     }
 
     Write-Log "Updating system hosts file..." "WARNING"
 
-    # ---- Backup ----
     if (Test-Path $hostsPath) {
         $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
         $backupPath = "$workDir\hosts-$timestamp.bak"
@@ -154,16 +133,13 @@ try {
         Manage-Backups
     }
 
-    # ---- Replace File ----
     Move-Item -Path $tempPath -Destination $hostsPath -Force
     Write-Log "Hosts file updated successfully." "SUCCESS"
 
-    # ---- Save ETag ----
     if ($remoteETag) {
         $remoteETag | Set-Content $etagPath -Force
     }
 
-    # ---- Flush DNS ----
     ipconfig /flushdns | Out-Null
     Write-Log "DNS cache flushed." "SUCCESS"
 
@@ -173,16 +149,11 @@ try {
     Write-Host "========================================" -ForegroundColor Green
     Write-Host ""
 
-    Write-Log "Update completed successfully." "SUCCESS"
-    exit 0
 }
 catch {
+    $global:ScriptResult = 99
     Write-Log "CRITICAL ERROR: $($_.Exception.Message)" "ERROR"
-
-    if (Test-Path $tempPath) {
-        Remove-Item $tempPath -Force -ErrorAction SilentlyContinue
-    }
-
-    exit 99
-
 }
+
+# ---- Script Finished ----
+Write-Host "`nScript finished. You may close this window." -ForegroundColor Cyan
