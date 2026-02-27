@@ -15,10 +15,8 @@
 # ================================
 
 $ErrorActionPreference = "Stop"
-$global:ScriptResult = 0
 
 # ---- Script Configuration ----
-$scriptUrl = "https://raw.githubusercontent.com/sharkwire28/hosts/main/scripts/updatesv2.ps1"
 $repoRawUrl = "https://raw.githubusercontent.com/sharkwire28/hosts/main/system/hosts"
 
 # ---- Self Elevation ----
@@ -26,17 +24,12 @@ $identity  = [Security.Principal.WindowsIdentity]::GetCurrent()
 $principal = New-Object Security.Principal.WindowsPrincipal($identity)
 
 if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-
     Write-Host "Requesting administrator privileges..." -ForegroundColor Yellow
 
-    $psi = New-Object System.Diagnostics.ProcessStartInfo
-    $psi.FileName  = "powershell.exe"
-    $psi.Arguments = "-ExecutionPolicy Bypass -NoProfile -Command `"irm $scriptUrl | iex`""
-    $psi.Verb      = "runas"
-    $psi.UseShellExecute = $true
-    $psi.WindowStyle = [System.Diagnostics.ProcessWindowStyle]::Normal
+    Start-Process powershell `
+        -ArgumentList "-ExecutionPolicy Bypass -NoProfile -Command `"irm $($MyInvocation.MyCommand.Source) | iex`"" `
+        -Verb RunAs
 
-    [System.Diagnostics.Process]::Start($psi) | Out-Null
     return
 }
 
@@ -52,16 +45,18 @@ $logPath     = "$workDir\hosts-updater.log"
 $etagPath    = "$workDir\etag.txt"
 $maxBackups  = 10  # Keep only last 10 backups
 
+# ---- Environment Setup ----
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 New-Item -Path $workDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 New-Item -Path $tempDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
+# ---- Logging ----
 function Write-Log {
     param([string]$Message, [string]$Level = "INFO")
 
-    $ts = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    $entry = "$ts [$Level] - $Message"
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $entry = "$timestamp [$Level] - $Message"
     Add-Content -Path $logPath -Value $entry
 
     switch ($Level) {
@@ -72,8 +67,9 @@ function Write-Log {
     }
 }
 
+# ---- Backup Management ----
 function Manage-Backups {
-    $backups = Get-ChildItem -Path $workDir -Filter "hosts-*.bak" |
+    $backups = Get-ChildItem $workDir -Filter "hosts-*.bak" |
                Sort-Object CreationTime -Descending
 
     if ($backups.Count -gt $maxBackups) {
@@ -82,11 +78,12 @@ function Manage-Backups {
     }
 }
 
+# ---- Main Logic ----
 try {
 
     Write-Log "Starting update check."
 
-    # HEAD request for ETag
+    # Check ETag
     $head = [System.Net.HttpWebRequest]::Create($repoRawUrl)
     $head.Method = "HEAD"
     $head.Timeout = 10000
@@ -102,7 +99,7 @@ try {
         return
     }
 
-    Write-Log "Change detected. Downloading latest version..."
+    Write-Log "Downloading latest system file..."
 
     $content = Invoke-RestMethod -Uri $repoRawUrl -TimeoutSec 20
     $content | Out-File -FilePath $tempPath -Encoding UTF8 -Force
@@ -151,10 +148,7 @@ try {
 
 }
 catch {
-    $global:ScriptResult = 99
     Write-Log "CRITICAL ERROR: $($_.Exception.Message)" "ERROR"
 }
 
-# ---- Script Finished ----
 Write-Host "`nScript finished. You may close this window." -ForegroundColor Cyan
-
