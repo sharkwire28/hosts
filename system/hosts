@@ -107081,6 +107081,8 @@
 0.0.0.0	manhwaclan.com
 0.0.0.0	kunmanga.com
 0.0.0.0	webtoons.com
+0.0.0.0	www.mgeko.cc
+0.0.0.0	mgeko.cc
 # Proxy Sites
 0.0.0.0 000000555.xyz
 0.0.0.0 ss.0001.xyz
@@ -123688,3 +123690,4 @@
 0.0.0.0 hkg2.edge.access.zznet.fun
 0.0.0.0 sin2.edge.access.zznet.fun
 0.0.0.0 dns.zzuhacker.cn
+0.0.0.0 cloudburstcdn.com
